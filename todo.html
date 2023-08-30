@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TODO APP</title>
+    <link rel="stylesheet" href="style.css">
+    <script>
+
+      // DELETE REQUEST -->
+        function callBackForDelete(id){
+            console.log("lol");
+
+            var todoToDelete = document.querySelector(`data-id = ${id}`);
+            todoToDelete.parentNode.removeChild(todoToDelete);
+        }
+        
+        function deleteIt(id){
+            console.log(id);
+            fetch("http://localhost:2002/todo/" + id,
+            {
+                method : "DELETE",
+                headers: {
+                    "content-type": "application/json",
+                },
+            }).then(callBackForDelete);
+        }
+
+
+ // ------------------ END ----------------------------------------------        
+
+
+
+      //GET ALL TODO AFTER REFRESHING THE PAGE -->
+        function callBackRequest(data) {
+        var content = document.getElementById("allTodo");
+        // content.innerHTML = JSON.stringify(data);
+        for (var i = 0; i < data.length; i++) {
+          //creating a div to store todo title,description
+          var todoList = document.createElement("div");
+          todoList.setAttribute("id", "list");
+
+          var serialNo = document.createElement("span");
+          serialNo.innerHTML = count + ".";
+          count++;
+
+          //creating a span for description
+          var descriptionText = document.createElement("span");
+          descriptionText.innerHTML = data[i].description;
+
+          //creating a deleting button for deleting the todo
+          var deleteTodo = document.createElement("button");
+          deleteTodo.innerHTML = "Remove";
+          deleteTodo.setAttribute("onclick" , "deleteIt(" + data[i].id + ")");
+
+          //creating edit button
+          var updateTodo = document.createElement("button");
+          updateTodo.innerHTML = "EDIT";
+          updateTodo.setAttribute("onclick", `update(${data[i].id})`);
+
+          //inserting the todo in div we've created i.e. todoList
+          todoList.appendChild(serialNo);
+          todoList.appendChild(descriptionText);
+          todoList.appendChild(deleteTodo);
+          todoList.appendChild(updateTodo);
+
+          //inserting the div to main content
+          content.appendChild(todoList);
+          
+        }
+
+      }
+
+      function callBackOfGetTodo(res) {
+        res.json().then(callBackRequest);
+      }
+      //get all the todo after refreshing the page
+      function getAllTodo() {
+        fetch("http://localhost:2002/todo", {
+          method: "GET",
+        }).then(callBackOfGetTodo);
+      }
+      getAllTodo();
+
+     // ------------------ END ----------------------------------------------     
+
+
+     //UPDATE REQUEST
+      function updateResponse(data){
+        console.log(data);
+        var updateTodo = document.querySelector(`[data-id="${data.id}"]`);
+        var descriptionSpan = updateTodo.querySelector("span");
+        descriptionSpan.innerHTML = data.description;
+      }
+
+      function callBackForUpdate(Resp){
+        res.json().then(updateResponse);
+      }
+
+      function update(id){
+          console.log(id);
+          var newTododescription = document.getElementById("description").value;
+          if(newTododescription === ""){
+            alert("ENTER THE TEXT IN THE DESCRIPTION TO EDIT");
+            exit;
+          }
+          fetch("http://localhost:2002/update/" + id,
+          {
+              method : "PUT",
+              body: JSON.stringify({
+                  description: newTododescription,
+              }),
+              headers: {
+                  "content-type": "application/json",
+              },
+          }).then(callBackForUpdate);
+        }
+
+
+
+     // ------------------ END -----------------------------------------------
+
+
+
+      // "POST" REQUEST -->
+        let count = 1;
+        function parsedResponse(data) {
+        console.log(data);
+        //main element
+        var content = document.getElementById("allTodo");
+
+        //creating a div to store todo title,description
+        var todoList = document.createElement("div");
+
+        var serialNo = document.createElement("span");
+        serialNo.innerHTML = count +".";
+        count++;
+
+        //creating a span for description
+        var descriptionText = document.createElement("span");
+        descriptionText.innerHTML = data.description;
+
+        //creating a deleting button for deleting the todo
+        var deleteTodo = document.createElement("button");
+        deleteTodo.innerHTML = "Remove";
+
+        var updateTodo = document.createElement("button");
+        updateTodo.innerHTML = "EDIT";
+
+        //inserting the todo in div we've created i.e. todoList
+        todoList.appendChild(serialNo);
+        todoList.appendChild(titleText);
+        todoList.appendChild(descriptionText);
+        todoList.appendChild(deleteTodo);
+        todoList.appendChild(updateTodo);
+        //inserting the div to main content
+        content.appendChild(todoList);
+      }
+
+      function callBack(resp) {
+        resp.json().then(parsedResponse);
+      }
+      //sending "post" http request to the backend (this is how we talk to backend)
+      function onpress() {
+        var tododescription = document.getElementById("description").value;
+        if(tododescription === ""){
+          alert("ENTER VALID DESCRIPTION");
+          exit;
+        }
+        fetch("http://localhost:2002/todo", {
+          method: "POST",
+          body: JSON.stringify({
+            description: tododescription,
+          }),
+          headers: {
+            "content-type": "application/json",
+          },
+        }).then(callBack);
+      } 
+    </script>
+
+  </head>
+  <body>
+
+    <div id="container">
+    <div id="main_div">
+      <h1>TODO APP</h1><br /><br />
+      <label for="todo">DESCRIPTION</label>
+      <textarea placeholder="ADD DESCRIPTION OF TODO" id="description" cols="60" rows="5" ></textarea><br /><br />
+      <button onclick="onpress()" id="button">ADD TODO</button>
+      <div id="allTodo"></div>
+    </div>
+     </div>
+
+  </body>
+</html> 
